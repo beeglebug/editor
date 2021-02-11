@@ -80,7 +80,10 @@ function createMesh(tile, neighbours, assets) {
   // TODO cache using key made from variables
   const geometry = createGeometry(tile, neighbours);
   const texture = assets[tile.texture];
-  return new Mesh(geometry, new MeshBasicMaterial({ map: texture }));
+
+  // TODO cache and reuse materials
+  const material = new MeshBasicMaterial({ map: texture });
+  return new Mesh(geometry, material);
 }
 
 function createCollider(x, y) {

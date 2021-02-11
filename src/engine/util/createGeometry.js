@@ -93,25 +93,25 @@ export default function createGeometry(tile, neighbours) {
   }
 
   // left ceiling wall
-  if (left && ceiling > left.ceiling) {
+  if (left && ceiling < left.ceiling) {
     const wall = createWall(left.ceiling, ceiling, FACE_LEFT, ALIGN_TOP);
     geometries.push(wall);
   }
 
   // right ceiling wall
-  if (right && ceiling > right.ceiling) {
+  if (right && ceiling < right.ceiling) {
     const wall = createWall(right.ceiling, ceiling, FACE_RIGHT, ALIGN_TOP);
     geometries.push(wall);
   }
 
   // above ceiling wall
-  if (above && ceiling > above.ceiling) {
+  if (above && ceiling < above.ceiling) {
     const wall = createWall(above.ceiling, ceiling, FACE_ABOVE, ALIGN_TOP);
     geometries.push(wall);
   }
 
   // below ceiling wall
-  if (below && ceiling > below.ceiling) {
+  if (below && ceiling < below.ceiling) {
     const wall = createWall(below.ceiling, ceiling, FACE_BELOW, ALIGN_TOP);
     geometries.push(wall);
   }

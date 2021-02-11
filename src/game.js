@@ -111,7 +111,7 @@ for (let i = 0; i < 20; i++) {
   scene.tileDefs[i] = {
     id: i,
     floor: rng.randomBetween(-2, 0),
-    ceiling: rng.randomBetween(3, 6),
+    ceiling: rng.randomBetween(4, 7),
     texture: rng.randomItemFromArray([
       'texture1.png',
       'texture2.png',
