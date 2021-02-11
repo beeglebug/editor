@@ -66,38 +66,38 @@ const test = {
           id: 1,
           floor: 0,
           ceiling: 2,
-          collision: false,
+          texture: 'texture1.png',
         },
         {
           id: 2,
           floor: 1,
           ceiling: 1,
-          collision: true,
+          texture: 'texture1.png',
         },
         {
           id: 3,
           height: 3,
           floor: 1,
           ceiling: 3,
-          collision: true,
+          texture: 'texture1.png',
         },
         {
           id: 1,
           floor: 0.5,
           ceiling: 2.5,
-          collision: false,
+          texture: 'texture1.png',
         },
         {
           id: 1,
           floor: -1,
           ceiling: 1.8,
-          collision: false,
+          texture: 'texture1.png',
         },
         {
           id: 6,
           floor: -0.5,
           ceiling: 2,
-          collision: false,
+          texture: 'texture1.png',
         },
       ],
     },
@@ -112,7 +112,12 @@ for (let i = 0; i < 20; i++) {
     id: i,
     floor: rng.randomBetween(-2, 0),
     ceiling: rng.randomBetween(3, 6),
-    collision: false,
+    texture: rng.randomItemFromArray([
+      'texture1.png',
+      'texture2.png',
+      'texture3.png',
+      'texture4.png',
+    ]),
   };
 }
 
@@ -121,5 +126,5 @@ for (let y = 0; y < scene.height; y++) {
     scene.tiles[y][x] = rng.randomIntBetween(1, 19);
   }
 }
-console.log(test);
+
 export default test;

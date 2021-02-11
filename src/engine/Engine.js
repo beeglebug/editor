@@ -1,4 +1,10 @@
-import { WebGLRenderer, PerspectiveCamera, Object3D } from 'three';
+import {
+  WebGLRenderer,
+  PerspectiveCamera,
+  Object3D,
+  TextureLoader,
+  NearestFilter,
+} from 'three';
 import CharacterController from './CharacterController';
 import Input from './input/Input';
 import loop from './loop';
@@ -73,10 +79,9 @@ export default class Engine extends EventEmitter {
 
     this.world = new Object3D();
 
-    const assets = {}; // loadAssets(game);
-
     const scene = game.scenes[0];
 
+    const assets = loadAssets(scene);
     const [tiles, entities] = createContent(scene, assets, this);
 
     if (tiles.length) this.world.add(...tiles);
@@ -175,4 +180,21 @@ export default class Engine extends EventEmitter {
     document.addEventListener('pointerlockchange', handlePointerLockChange);
     document.addEventListener('pointerlockerror', handlePointerLockError);
   }
+}
+
+function loadAssets(scene) {
+  const assets = {};
+  const loader = new TextureLoader();
+
+  scene.tileDefs.forEach((tileDef) => {
+    const { texture } = tileDef;
+    if (assets[texture] === undefined) {
+      const tx = loader.load(texture);
+      tx.magFilter = NearestFilter;
+      tx.minFilter = NearestFilter;
+      assets[texture] = tx;
+    }
+  });
+
+  return assets;
 }

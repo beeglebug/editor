@@ -17,14 +17,14 @@ const WALL_HEIGHT = 2.4;
  */
 export default function (scene, assets, engine) {
   const entities = [];
-  const tiles = createTiles(scene);
+  const tiles = createTiles(scene, assets);
   return [tiles, entities];
 }
 
 /**
  * @param {import('../../game').Scene} scene
  */
-function createTiles(scene) {
+function createTiles(scene, assets) {
   const meshes = [];
 
   const { tiles, width, height, tileDefs } = scene;
@@ -53,7 +53,7 @@ function createTiles(scene) {
 
         const neighbours = getNeighbours(tiles, width, height, x, y);
         const neighbourTiles = neighbours.map(getTile);
-        const mesh = createMesh(tile, neighbourTiles);
+        const mesh = createMesh(tile, neighbourTiles, assets);
 
         if (tile.collision === true) {
           // mesh.collider = createCollider(dx, dy);
@@ -76,10 +76,11 @@ const geometryCache = {};
 /**
  * @param {import('../../game').Tile} tile
  */
-function createMesh(tile, neighbours) {
+function createMesh(tile, neighbours, assets) {
   // TODO cache using key made from variables
   const geometry = createGeometry(tile, neighbours);
-  return new Mesh(geometry, new MeshNormalMaterial());
+  const texture = assets[tile.texture];
+  return new Mesh(geometry, new MeshBasicMaterial({ map: texture }));
 }
 
 function createCollider(x, y) {
