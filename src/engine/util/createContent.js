@@ -27,55 +27,24 @@ export default function (scene, assets, engine) {
 function createTiles(scene, assets) {
   const meshes = [];
 
-  const { tiles, width, height, tileDefs } = scene;
+  const { tiles, width, height } = scene;
 
-  const getTile = (id) => {
-    if (id === null) return null;
-    const tile = tileDefs[id];
-    if (tile === undefined) {
-      throw new Error(`No tileDef for id ${id}`);
-    }
-    return tile;
-  };
+  tiles.forEach((tile) => {
+    const { x, y } = tile;
+    const neighbours = getNeighbours(tiles, width, height, x, y);
+    const mesh = createMesh(tile, neighbours, assets);
 
-  try {
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const tileId = tiles[y][x];
+    const dx = x * TILE_SIZE;
+    const dy = y * TILE_SIZE;
 
-        const dx = x * TILE_SIZE;
-        const dy = y * TILE_SIZE;
-
-        // empty space
-        if (tileId === 0) continue;
-
-        const tile = getTile(tileId);
-
-        const neighbours = getNeighbours(tiles, width, height, x, y);
-        const neighbourTiles = neighbours.map(getTile);
-        const mesh = createMesh(tile, neighbourTiles, assets);
-
-        if (tile.collision === true) {
-          // mesh.collider = createCollider(dx, dy);
-        }
-
-        // 2d to 3d
-        mesh.position.set(dx, 0, dy);
-        meshes.push(mesh);
-      }
-    }
-  } catch (e) {
-    console.warn('Failed to create tiles', e);
-  }
+    // 2d to 3d
+    mesh.position.set(dx, 0, dy);
+    meshes.push(mesh);
+  });
 
   return meshes;
 }
 
-const geometryCache = {};
-
-/**
- * @param {import('../../game').Tile} tile
- */
 function createMesh(tile, neighbours, assets) {
   // TODO cache using key made from variables
   const geometry = createGeometry(tile, neighbours);
@@ -92,31 +61,32 @@ function createCollider(x, y) {
 
 function getNeighbours(data, width, height, x, y) {
   const neighbours = [];
+  const ix = y * width + x;
 
   // left
   if (x > 0) {
-    neighbours.push(data[y][x - 1]);
+    neighbours.push(data[ix - 1]);
   } else {
     neighbours.push(null);
   }
 
   // right
   if (x < width - 1) {
-    neighbours.push(data[y][x + 1]);
+    neighbours.push(data[ix + 1]);
   } else {
     neighbours.push(null);
   }
 
   // above
   if (y > 0) {
-    neighbours.push(data[y - 1][x]);
+    neighbours.push(data[ix - width]);
   } else {
     neighbours.push(null);
   }
 
   // below
   if (y < height - 1) {
-    neighbours.push(data[y + 1][x]);
+    neighbours.push(data[ix + width]);
   } else {
     neighbours.push(null);
   }

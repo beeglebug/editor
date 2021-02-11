@@ -10,11 +10,11 @@ export default class RandomNumberGenerator {
   }
 
   randomBetween(min, max) {
-    return this.generator.random() * (max - min + 1) + min;
+    return this.generator.random() * (max - min) + min;
   }
 
   randomIntBetween(min, max) {
-    return Math.floor(this.generator.random() * (max - min + 1) + min);
+    return Math.floor(this.generator.random() * (max - min) + min);
   }
 
   randomItemFromArray(arr) {

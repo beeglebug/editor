@@ -186,8 +186,8 @@ function loadAssets(scene) {
   const assets = {};
   const loader = new TextureLoader();
 
-  scene.tileDefs.forEach((tileDef) => {
-    const { texture } = tileDef;
+  scene.tiles.forEach((tile) => {
+    const { texture } = tile;
     if (assets[texture] === undefined) {
       const tx = loader.load(texture);
       tx.magFilter = NearestFilter;
