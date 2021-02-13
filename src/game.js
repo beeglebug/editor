@@ -10,7 +10,7 @@ const test = {
       width: 16,
       height: 16,
       spawn: {
-        position: [12.5, 0, 7],
+        position: [1, 0, 1],
         rotation: [0, 3.72, 0],
       },
       tiles: [],

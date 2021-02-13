@@ -1,5 +1,6 @@
 import { PlaneGeometry } from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils';
+import { TILE_SIZE } from '../consts';
 
 const PI2 = Math.PI / 2;
 
@@ -9,19 +10,6 @@ const FACE_LEFT = 0;
 const FACE_RIGHT = 1;
 const FACE_ABOVE = 2;
 const FACE_BELOW = 3;
-
-const TILE_SIZE = 2;
-
-// TODO texturing with buffergeometry
-// const offset = (vec2) => {
-//   if (align === ALIGN_TOP) {
-//     vec2.y = Math.min(vec2.y, height);
-//   } else {
-//     vec2.y = Math.max(vec2.y, 1 - height);
-//   }
-// };
-//geometry.faceVertexUvs[0][0].forEach(offset);
-//geometry.faceVertexUvs[0][1].forEach(offset);
 
 function createWall(bottom, top, facing, align = ALIGN_BOTTOM) {
   const height = top - bottom;

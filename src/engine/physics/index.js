@@ -6,7 +6,12 @@ import collideCircleCircle from './collision/collideCircleCircle';
 
 export default class PhysicsManager {
   colliders = [];
+  tilemap = null;
   _response = new CollisionResponse();
+
+  setTileMap(tiles) {
+    this.tilemap = this.tilemap;
+  }
 
   setColliders(colliders) {
     this.colliders = colliders;

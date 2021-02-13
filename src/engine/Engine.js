@@ -81,6 +81,8 @@ export default class Engine extends EventEmitter {
 
     const scene = game.scenes[0];
 
+    this.controller.scene = scene;
+
     const assets = loadAssets(scene);
     const [tiles, entities] = createContent(scene, assets, this);
 

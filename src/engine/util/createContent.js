@@ -1,16 +1,7 @@
-import {
-  BoxGeometry,
-  Mesh,
-  MeshBasicMaterial,
-  MeshNormalMaterial,
-  PlaneGeometry,
-} from 'three';
-import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils';
+import { Mesh, MeshBasicMaterial } from 'three';
+import { TILE_SIZE } from '../consts';
 import Rect from '../physics/geometry/Rect';
 import createGeometry from './createGeometry';
-
-const TILE_SIZE = 2;
-const WALL_HEIGHT = 2.4;
 
 /**
  * @param {import('../../game').Scene} scene

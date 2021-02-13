@@ -3,6 +3,7 @@ import Input from './input/Input';
 import clamp from './maths/clamp';
 import Circle from './physics/geometry/Circle';
 import Physics from './physics';
+import { TILE_SIZE } from './consts';
 
 const halfPi = Math.PI / 2;
 const screenCenter = new Vector2();
@@ -23,11 +24,12 @@ export default class CharacterController extends Object3D {
   // an entity in front of us which we could interact with
   interactionTarget = null;
 
-  constructor({ camera, controls, physics }) {
+  constructor({ camera, controls, physics, scene }) {
     super();
 
     this.physics = physics;
     this.camera = camera;
+    this.scene = scene;
 
     this.pitch = new Object3D();
     this.pitch.position.y = this.eyeHeight;
@@ -99,8 +101,19 @@ export default class CharacterController extends Object3D {
 
     this.physics.collide(this.collider, colliders, this.onCollision);
 
+    // handled in 2d with collider
+    const tx = Math.floor(this.position.x / TILE_SIZE);
+    const ty = Math.floor(this.position.z / TILE_SIZE);
+    const ix = tx * this.scene.width + ty;
+    const tile = this.scene.tiles[ix];
+
+    let y = this.eyeHeight;
+    if (tile) {
+      y += tile.floor;
+    }
+
     // update the player controller based on the collider
-    this.position.set(this.collider.x, 0, this.collider.y);
+    this.position.set(this.collider.x, y, this.collider.y);
   }
 
   onCollision = (response) => {
