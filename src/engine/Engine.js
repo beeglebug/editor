@@ -160,28 +160,28 @@ export default class Engine extends EventEmitter {
     // renderReticle(this.ctx, this.controller);
   }
 
-  hasPointerLock() {
-    return document.pointerLockElement === this.canvas3d;
-  }
+  // hasPointerLock() {
+  //   return document.pointerLockElement === this.canvas3d;
+  // }
 
-  setupPointerLock() {
-    const handlePointerLockChange = () => {
-      if (this.hasPointerLock()) {
-        this.controller.enabled = true;
-      } else {
-        this.controller.enabled = false;
-        this.stop();
-      }
-    };
+  // setupPointerLock() {
+  //   const handlePointerLockChange = () => {
+  //     if (this.hasPointerLock()) {
+  //       this.controller.enabled = true;
+  //     } else {
+  //       this.controller.enabled = false;
+  //       this.stop();
+  //     }
+  //   };
 
-    const handlePointerLockError = (error) => {
-      console.warn('Pointer Lock Error', error);
-      this.stop();
-    };
+  //   const handlePointerLockError = (error) => {
+  //     console.warn('Pointer Lock Error', error);
+  //     this.stop();
+  //   };
 
-    document.addEventListener('pointerlockchange', handlePointerLockChange);
-    document.addEventListener('pointerlockerror', handlePointerLockError);
-  }
+  //   document.addEventListener('pointerlockchange', handlePointerLockChange);
+  //   document.addEventListener('pointerlockerror', handlePointerLockError);
+  // }
 }
 
 function loadAssets(scene) {

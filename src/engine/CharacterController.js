@@ -1,5 +1,5 @@
-import { Object3D, Vector3, Vector2, Raycaster } from 'three';
-import Input from './input/Input';
+import { Object3D, Vector3, Vector2, Raycaster, Euler } from 'three';
+import { getAxis, getButton, MouseX, MouseY } from './input/Input';
 import clamp from './maths/clamp';
 import Circle from './physics/geometry/Circle';
 import Physics from './physics';
@@ -18,29 +18,33 @@ export default class CharacterController extends Object3D {
 
   collider = null;
   mouseSensitivity = 0.6;
-  speed = 100;
-  runSpeed = 200;
+  speed = 0.1;
+  runSpeed = 0.2;
 
   // an entity in front of us which we could interact with
   interactionTarget = null;
 
-  constructor({ camera, controls, physics, scene }) {
+  constructor(camera, controls) {
     super();
 
-    this.physics = physics;
+    //this.physics = physics;
     this.camera = camera;
-    this.scene = scene;
+    //this.scene = scene;
 
-    this.pitch = new Object3D();
-    this.pitch.position.y = this.eyeHeight;
+    this.euler = new Euler(0, 0, 0, 'YXZ');
 
-    this.add(this.pitch);
-    this.pitch.add(camera);
+    // this.pitch = new Object3D();
+    // this.pitch.position.y = this.eyeHeight;
 
-    this.collider = new Circle(0, 0, 0.6);
+    // this.add(this.pitch);
+    // this.pitch.add(camera);
 
-    this.raycaster = new Raycaster();
-    this.raycaster.far = INTERACTION_RANGE;
+    this.add(camera);
+
+    // this.collider = new Circle(0, 0, 0.6);
+
+    // this.raycaster = new Raycaster();
+    // this.raycaster.far = INTERACTION_RANGE;
 
     this.controls = controls;
   }
@@ -53,42 +57,55 @@ export default class CharacterController extends Object3D {
     this.enabled = false;
   }
 
-  resetRotation(y, x) {
-    this.rotation.y = y;
-    this.pitch.rotation.x = x;
-  }
+  // resetRotation(y, x) {
+  //   this.rotation.y = y;
+  //   this.pitch.rotation.x = x;
+  // }
 
   handleMouseInput(delta) {
-    // apply mouse movement
-    this.rotation.y -=
-      Input.getAxis(Input.MouseX) * delta * this.mouseSensitivity;
-    this.pitch.rotation.x -=
-      Input.getAxis(Input.MouseY) * delta * this.mouseSensitivity;
+    // // apply mouse movement
+    // this.rotation.y -=
+    //   getAxis(MouseX) * delta * this.mouseSensitivity;
+    // this.pitch.rotation.x -=
+    //   getAxis(MouseY) * delta * this.mouseSensitivity;
 
-    // clamp between straight down and straight up
-    this.pitch.rotation.x = clamp(this.pitch.rotation.x, -halfPi, halfPi);
+    // // clamp between straight down and straight up
+    // this.pitch.rotation.x = clamp(this.pitch.rotation.x, -halfPi, halfPi);
+
+    this.euler.setFromQuaternion(this.camera.quaternion);
+
+    this.euler.y -= getAxis(MouseX) * 0.002;
+    this.euler.x -= getAxis(MouseY) * 0.002;
+
+    this.euler.x = clamp(this.euler.x, -halfPi, halfPi);
+
+    this.camera.quaternion.setFromEuler(this.euler);
   }
 
   handleKeyboardInput(delta) {
-    const moveForward = Input.getButton(this.controls.forward);
-    const moveBack = Input.getButton(this.controls.back);
-    const moveLeft = Input.getButton(this.controls.left);
-    const moveRight = Input.getButton(this.controls.right);
-    const running = Input.getButton(this.controls.run);
+    const moveForward = getButton(this.controls.forward);
+    const moveBack = getButton(this.controls.back);
+    const moveLeft = getButton(this.controls.left);
+    const moveRight = getButton(this.controls.right);
+    const running = getButton(this.controls.run);
 
     // apply damping
-    this.velocity.x -= this.velocity.x * 10.0 * delta;
-    this.velocity.z -= this.velocity.z * 10.0 * delta;
+    // this.velocity.x -= this.velocity.x * 10.0 * delta;
+    // this.velocity.z -= this.velocity.z * 10.0 * delta;
 
-    this.direction.z = moveForward - moveBack;
-    this.direction.x = moveLeft - moveRight;
-    this.direction.normalize();
-
-    const z = this.direction.z * (running ? this.runSpeed : this.speed);
-    const x = this.direction.x * (running ? this.runSpeed : this.speed);
-
-    if (moveForward || moveBack) this.velocity.z -= z * delta;
-    if (moveLeft || moveRight) this.velocity.x -= x * delta;
+    if (moveForward || moveBack) {
+      const distance =
+        (moveForward - moveBack) * (running ? this.runSpeed : this.speed);
+      this.velocity.setFromMatrixColumn(this.camera.matrix, 0);
+      this.velocity.crossVectors(this.camera.up, this.velocity);
+      this.camera.position.addScaledVector(this.velocity, distance);
+    }
+    if (moveLeft || moveRight) {
+      const distance =
+        (moveRight - moveLeft) * (running ? this.runSpeed : this.speed);
+      this.velocity.setFromMatrixColumn(this.camera.matrix, 0);
+      this.camera.position.addScaledVector(this.velocity, distance);
+    }
   }
 
   handlePhysics() {
@@ -128,12 +145,8 @@ export default class CharacterController extends Object3D {
     this.handleMouseInput(delta);
     this.handleKeyboardInput(delta);
 
-    this.translateX(this.velocity.x * delta);
-    this.translateZ(this.velocity.z * delta);
-
-    this.handlePhysics();
-
-    this.handleInteraction(nearbyEntities);
+    //this.handlePhysics();
+    //this.handleInteraction(nearbyEntities);
   }
 
   handleInteraction(nearbyEntities) {
@@ -154,7 +167,7 @@ export default class CharacterController extends Object3D {
       this.interactionTarget = null;
     }
 
-    if (this.interactionTarget && Input.getButtonDown(this.controls.interact)) {
+    if (this.interactionTarget && getButtonDown(this.controls.interact)) {
       this.interactionTarget.interact(this);
     }
   }
