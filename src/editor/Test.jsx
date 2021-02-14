@@ -6,6 +6,10 @@ import KeyCode from '../engine/input/KeyCode';
 import Overlay from './Overlay';
 import useStore from './store';
 import usePointerLock from '../engine/hooks/usePointerLock';
+import useEffectfulState from '../engine/hooks/useEffectfulState';
+import game from '../game';
+import TileMap from './TileMap';
+import useAssets from '../engine/hooks/useAssets';
 
 export default function Test() {
   const running = useStore((state) => state.running);
@@ -14,7 +18,9 @@ export default function Test() {
     <>
       {running === false && <Overlay onClick={start} />}
       <Canvas camera={{ fov: 75, position: [3, 1, 3] }}>
-        <Engine running={running} />
+        <Suspense fallback={null}>
+          <Engine running={running} />
+        </Suspense>
       </Canvas>
     </>
   );
@@ -22,13 +28,17 @@ export default function Test() {
 
 function Engine({ running }) {
   usePointerLock();
+  const scene = game.scenes[0];
+  const { width, height, tiles } = scene;
+  const assets = useAssets(scene);
   return (
-    <Suspense fallback={null}>
-      <ambientLight />
+    <>
       <CharacterController enabled={running} />
+      <TileMap width={width} height={height} tiles={tiles} />
+      <ambientLight />
       <gridHelper />
       <axesHelper />
-    </Suspense>
+    </>
   );
 }
 
@@ -53,13 +63,4 @@ function CharacterController(props) {
   return controls ? (
     <primitive dispose={undefined} object={controls} {...props} />
   ) : null;
-}
-
-function useEffectfulState(fn, deps) {
-  const [state, set] = useState();
-  useLayoutEffect(() => {
-    const value = fn();
-    set(value);
-  }, deps);
-  return state;
 }
