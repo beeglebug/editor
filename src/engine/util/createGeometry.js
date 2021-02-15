@@ -54,7 +54,7 @@ export default function createGeometry(tile, neighbours) {
 
   const geometries = [floorPlane, ceilingPlane];
 
-  const [left, right, above, below] = neighbours;
+  const [above, left, right, below] = neighbours;
 
   // left floor wall
   if (left && floor > left.floor) {

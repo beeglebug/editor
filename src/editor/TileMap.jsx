@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { TILE_SIZE } from '../engine/consts';
 import createGeometry from '../engine/util/createGeometry';
-import getNeighbours from '../engine/util/getNeighbours';
+import { getNeighbours } from '../engine/util/getNeighbours';
 
 export default function TileMap({ width, height, tiles, assets }) {
   const getGeometry = useCallback(

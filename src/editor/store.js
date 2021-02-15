@@ -7,9 +7,11 @@ const useStore = create((set) => ({
   game,
   scene: 0,
   playerPosition: [0, 0, 0],
+  playerTilePosition: [0, 0],
   start: () => set({ running: true }),
   stop: () => set({ running: false }),
   setPlayerPosition: (x, y, z) => set({ playerPosition: [x, y, z] }),
+  setPlayerTilePosition: (x, y) => set({ playerTilePosition: [x, y] }),
 }));
 
 export const sceneSelector = (state) => state.game.scenes[state.scene];

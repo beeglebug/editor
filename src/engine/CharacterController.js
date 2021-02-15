@@ -5,6 +5,7 @@ import Circle from './physics/geometry/Circle';
 import Physics from './physics';
 import { TILE_SIZE } from './consts';
 import useStore, { sceneSelector } from '../editor/store';
+import { getSurrounding } from './util/getNeighbours';
 
 const halfPi = Math.PI / 2;
 const screenCenter = new Vector2();
@@ -40,6 +41,8 @@ export default class CharacterController extends Object3D {
     // this.raycaster.far = INTERACTION_RANGE;
 
     this.controls = controls;
+
+    window.controller = this;
   }
 
   handleMouseInput(delta) {
@@ -132,31 +135,50 @@ export default class CharacterController extends Object3D {
     this.handleMouseInput(delta);
     this.handleKeyboardInput(delta);
 
-    const GRAVITY = 30;
+    const GRAVITY = 0.1;
 
     if (this.onFloor) {
       // apply damping
       this.velocity.x -= this.velocity.x * 10.0 * delta;
       this.velocity.z -= this.velocity.z * 10.0 * delta;
     } else {
-      // this.velocity.y -= GRAVITY * delta;
+      this.velocity.y -= GRAVITY * delta;
     }
 
     this.position.add(this.velocity);
 
     const state = useStore.getState();
+    const tx = Math.floor(this.position.x / TILE_SIZE);
+    const ty = Math.floor(this.position.z / TILE_SIZE);
 
     state.setPlayerPosition(this.position.x, this.position.y, this.position.z);
+    state.setPlayerTilePosition(tx, ty);
 
-    const scene = sceneSelector(useStore.getState(state));
+    const surrounding = this.getSurroundingTiles(tx, ty);
 
-    const heightUnder = scene.tiles;
+    // center
+    const onTile = surrounding[4];
+
+    if (this.position.y > onTile.floor) {
+      this.onFloor = false;
+    }
+
+    if (this.position.y < onTile.floor) {
+      this.onFloor = true;
+      this.position.y = onTile.floor;
+    }
 
     // this.collider.position.add(this.velocity)
     // this.handlePhysics();
     // this.position.set(this.collider.position)
 
     //this.handleInteraction(nearbyEntities);
+  }
+
+  getSurroundingTiles(tx, ty) {
+    const state = useStore.getState();
+    const scene = sceneSelector(state);
+    return getSurrounding(scene.tiles, scene.width, scene.height, tx, ty);
   }
 
   // handleInteraction(nearbyEntities) {
