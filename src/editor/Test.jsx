@@ -34,7 +34,7 @@ function Engine({ running }) {
   const assets = useAssets(scene);
   return (
     <>
-      <CharacterController enabled={running} />
+      <CharacterController enabled={running} scene={scene} />
       <TileMap width={width} height={height} tiles={tiles} assets={assets} />
       <ambientLight />
       <gridHelper args={[100, 50]} />
