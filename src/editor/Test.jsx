@@ -4,12 +4,12 @@ import { createButton } from '../engine/input/Input';
 import CharacterControllerImpl from '../engine/CharacterController';
 import KeyCode from '../engine/input/KeyCode';
 import Overlay from './Overlay';
-import useStore from './store';
+import useStore, { sceneSelector } from './store';
 import usePointerLock from '../engine/hooks/usePointerLock';
 import useEffectfulState from '../engine/hooks/useEffectfulState';
-import game from '../game';
 import TileMap from './TileMap';
 import useAssets from '../engine/hooks/useAssets';
+import Debug from './Debug';
 
 export default function Test() {
   const running = useStore((state) => state.running);
@@ -17,7 +17,8 @@ export default function Test() {
   return (
     <>
       {running === false && <Overlay onClick={start} />}
-      <Canvas camera={{ fov: 75, position: [3, 1, 3] }}>
+      <Debug />
+      <Canvas camera={{ fov: 75 }}>
         <Suspense fallback={null}>
           <Engine running={running} />
         </Suspense>
@@ -28,15 +29,15 @@ export default function Test() {
 
 function Engine({ running }) {
   usePointerLock();
-  const scene = game.scenes[0];
+  const scene = useStore(sceneSelector);
   const { width, height, tiles } = scene;
   const assets = useAssets(scene);
   return (
     <>
       <CharacterController enabled={running} />
-      <TileMap width={width} height={height} tiles={tiles} />
+      <TileMap width={width} height={height} tiles={tiles} assets={assets} />
       <ambientLight />
-      <gridHelper />
+      <gridHelper args={[100, 50]} />
       <axesHelper />
     </>
   );

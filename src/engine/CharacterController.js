@@ -4,6 +4,7 @@ import clamp from './maths/clamp';
 import Circle from './physics/geometry/Circle';
 import Physics from './physics';
 import { TILE_SIZE } from './consts';
+import useStore, { sceneSelector } from '../editor/store';
 
 const halfPi = Math.PI / 2;
 const screenCenter = new Vector2();
@@ -15,11 +16,13 @@ export default class CharacterController extends Object3D {
   eyeHeight = 1.5;
   velocity = new Vector3();
   direction = new Vector3();
-
+  euler = new Euler(0, 0, 0, 'YXZ');
+  _direction = new Vector3();
+  onFloor = true;
   collider = null;
   mouseSensitivity = 0.6;
-  speed = 0.1;
-  runSpeed = 0.2;
+  speed = 1.5;
+  runSpeed = 3;
 
   // an entity in front of us which we could interact with
   interactionTarget = null;
@@ -27,19 +30,9 @@ export default class CharacterController extends Object3D {
   constructor(camera, controls) {
     super();
 
-    //this.physics = physics;
-    this.camera = camera;
-    //this.scene = scene;
-
-    this.euler = new Euler(0, 0, 0, 'YXZ');
-
-    // this.pitch = new Object3D();
-    // this.pitch.position.y = this.eyeHeight;
-
-    // this.add(this.pitch);
-    // this.pitch.add(camera);
-
+    camera.position.set(0, this.eyeHeight, 0);
     this.add(camera);
+    this.camera = camera;
 
     // this.collider = new Circle(0, 0, 0.6);
 
@@ -49,62 +42,56 @@ export default class CharacterController extends Object3D {
     this.controls = controls;
   }
 
-  enable() {
-    this.enabled = true;
-  }
-
-  disable() {
-    this.enabled = false;
-  }
-
-  // resetRotation(y, x) {
-  //   this.rotation.y = y;
-  //   this.pitch.rotation.x = x;
-  // }
-
   handleMouseInput(delta) {
-    // // apply mouse movement
-    // this.rotation.y -=
-    //   getAxis(MouseX) * delta * this.mouseSensitivity;
-    // this.pitch.rotation.x -=
-    //   getAxis(MouseY) * delta * this.mouseSensitivity;
-
-    // // clamp between straight down and straight up
-    // this.pitch.rotation.x = clamp(this.pitch.rotation.x, -halfPi, halfPi);
-
     this.euler.setFromQuaternion(this.camera.quaternion);
 
-    this.euler.y -= getAxis(MouseX) * 0.002;
-    this.euler.x -= getAxis(MouseY) * 0.002;
-
+    this.euler.y -= getAxis(MouseX) * delta;
+    this.euler.x -= getAxis(MouseY) * delta;
     this.euler.x = clamp(this.euler.x, -halfPi, halfPi);
 
     this.camera.quaternion.setFromEuler(this.euler);
   }
 
+  getForwardVector() {
+    this.camera.getWorldDirection(this._direction);
+    this._direction.y = 0;
+    this._direction.normalize();
+    return this._direction;
+  }
+
+  getSideVector() {
+    this.camera.getWorldDirection(this._direction);
+    this._direction.y = 0;
+    this._direction.normalize();
+    this._direction.cross(this.camera.up);
+    return this._direction;
+  }
+
   handleKeyboardInput(delta) {
-    const moveForward = getButton(this.controls.forward);
-    const moveBack = getButton(this.controls.back);
-    const moveLeft = getButton(this.controls.left);
-    const moveRight = getButton(this.controls.right);
+    const movingForward = getButton(this.controls.forward);
+    const movingBack = getButton(this.controls.back);
+    const movingLeft = getButton(this.controls.left);
+    const movingRight = getButton(this.controls.right);
     const running = getButton(this.controls.run);
 
-    // apply damping
-    // this.velocity.x -= this.velocity.x * 10.0 * delta;
-    // this.velocity.z -= this.velocity.z * 10.0 * delta;
+    if (!this.onFloor) return;
 
-    if (moveForward || moveBack) {
-      const distance =
-        (moveForward - moveBack) * (running ? this.runSpeed : this.speed);
-      this.velocity.setFromMatrixColumn(this.camera.matrix, 0);
-      this.velocity.crossVectors(this.camera.up, this.velocity);
-      this.camera.position.addScaledVector(this.velocity, distance);
+    const speed = running ? this.runSpeed : this.speed;
+
+    if (movingForward) {
+      this.velocity.add(this.getForwardVector().multiplyScalar(speed * delta));
     }
-    if (moveLeft || moveRight) {
-      const distance =
-        (moveRight - moveLeft) * (running ? this.runSpeed : this.speed);
-      this.velocity.setFromMatrixColumn(this.camera.matrix, 0);
-      this.camera.position.addScaledVector(this.velocity, distance);
+
+    if (movingBack) {
+      this.velocity.add(this.getForwardVector().multiplyScalar(-speed * delta));
+    }
+
+    if (movingLeft) {
+      this.velocity.add(this.getSideVector().multiplyScalar(-speed * delta));
+    }
+
+    if (movingRight) {
+      this.velocity.add(this.getSideVector().multiplyScalar(speed * delta));
     }
   }
 
@@ -145,30 +132,53 @@ export default class CharacterController extends Object3D {
     this.handleMouseInput(delta);
     this.handleKeyboardInput(delta);
 
-    //this.handlePhysics();
+    const GRAVITY = 30;
+
+    if (this.onFloor) {
+      // apply damping
+      this.velocity.x -= this.velocity.x * 10.0 * delta;
+      this.velocity.z -= this.velocity.z * 10.0 * delta;
+    } else {
+      // this.velocity.y -= GRAVITY * delta;
+    }
+
+    this.position.add(this.velocity);
+
+    const state = useStore.getState();
+
+    state.setPlayerPosition(this.position.x, this.position.y, this.position.z);
+
+    const scene = sceneSelector(useStore.getState(state));
+
+    const heightUnder = scene.tiles;
+
+    // this.collider.position.add(this.velocity)
+    // this.handlePhysics();
+    // this.position.set(this.collider.position)
+
     //this.handleInteraction(nearbyEntities);
   }
 
-  handleInteraction(nearbyEntities) {
-    this.raycaster.setFromCamera(screenCenter, this.camera);
+  // handleInteraction(nearbyEntities) {
+  //   this.raycaster.setFromCamera(screenCenter, this.camera);
 
-    const interactiveEntities = nearbyEntities.filter(
-      (entity) => entity.interactive,
-    );
+  //   const interactiveEntities = nearbyEntities.filter(
+  //     (entity) => entity.interactive,
+  //   );
 
-    const intersections = this.raycaster.intersectObjects(interactiveEntities);
+  //   const intersections = this.raycaster.intersectObjects(interactiveEntities);
 
-    if (intersections.length) {
-      const closest = intersections[0];
+  //   if (intersections.length) {
+  //     const closest = intersections[0];
 
-      // the target is the parent Entity
-      this.interactionTarget = closest.object.parent;
-    } else {
-      this.interactionTarget = null;
-    }
+  //     // the target is the parent Entity
+  //     this.interactionTarget = closest.object.parent;
+  //   } else {
+  //     this.interactionTarget = null;
+  //   }
 
-    if (this.interactionTarget && getButtonDown(this.controls.interact)) {
-      this.interactionTarget.interact(this);
-    }
-  }
+  //   if (this.interactionTarget && getButtonDown(this.controls.interact)) {
+  //     this.interactionTarget.interact(this);
+  //   }
+  // }
 }

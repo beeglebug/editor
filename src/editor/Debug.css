@@ -1,0 +1,10 @@
+.debug {
+  position: fixed;
+  top: 0;
+  right: 0;
+  background-color: #000000;
+  color: #ffffff;
+  z-index: 3;
+  font-family: monospace;
+  white-space: pre;
+}

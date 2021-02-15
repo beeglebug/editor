@@ -154,8 +154,7 @@ export default class Engine extends EventEmitter {
   };
 
   render() {
-    this.renderer.render(this.scene, this.camera);
-
+    // this.renderer.render(this.scene, this.camera);
     // 2d rendering
     // renderReticle(this.ctx, this.controller);
   }

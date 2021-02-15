@@ -49,38 +49,3 @@ function createMesh(tile, neighbours, assets) {
 function createCollider(x, y) {
   return new Rect(x, y, TILE_SIZE, TILE_SIZE);
 }
-
-function getNeighbours(data, width, height, x, y) {
-  const neighbours = [];
-  const ix = y * width + x;
-
-  // left
-  if (x > 0) {
-    neighbours.push(data[ix - 1]);
-  } else {
-    neighbours.push(null);
-  }
-
-  // right
-  if (x < width - 1) {
-    neighbours.push(data[ix + 1]);
-  } else {
-    neighbours.push(null);
-  }
-
-  // above
-  if (y > 0) {
-    neighbours.push(data[ix - width]);
-  } else {
-    neighbours.push(null);
-  }
-
-  // below
-  if (y < height - 1) {
-    neighbours.push(data[ix + width]);
-  } else {
-    neighbours.push(null);
-  }
-
-  return neighbours;
-}
